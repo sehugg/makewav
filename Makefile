@@ -6,4 +6,4 @@ all:makewav
 #	$(CC) -c queue.c
 
 makewav: queue.o streambuffer.o
-	$(CC) $(LDFLAGS) -lm -O queue.o streambuffer.o -o makewav makewav.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -lm -O queue.o streambuffer.o -o makewav makewav.c
