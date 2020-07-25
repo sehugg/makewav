@@ -1,16 +1,16 @@
 #define BSM_2K       0
 #define BSM_CV       1
 #define BSM_4K       2
-#define BSM_28SC	 3
+#define BSM_28SC     3
 #define BSM_F8SC     4
-#define BSM_28		 5
+#define BSM_28         5
 #define BSM_F8       6
 #define BSM_FE       7
 #define BSM_3F       8
 #define BSM_E0       9
-#define BSM_FA	    10
-#define BSM_2A	    11
-#define BSM_3A	    12
+#define BSM_FA        10
+#define BSM_2A        11
+#define BSM_3A        12
 #define BSM_FANR    13
 #define BSM_2ANR    14
 #define BSM_3ANR    15
@@ -28,10 +28,10 @@
 #define BSM_24SC    27
 #define BSM_34SC    28
 #define BSM_44SC    29
-#define BSM_F4	    30
-#define BSM_24		31
-#define BSM_34		32
-#define BSM_44		33
+#define BSM_F4        30
+#define BSM_24        31
+#define BSM_34        32
+#define BSM_44        33
 #define BSM_MB      34
 #define FMT_22KHZ_8BIT_MONO 0
 #define FMT_44KHZ_8BIT_MONO 1
@@ -44,15 +44,15 @@
 #define DISPLAY_SUMMARY  2
 #define DISPLAY_DETAILS  3
 
-#ifndef _WIN32
-    #define _MAX_FNAME 256
-    #define _MAX_PATH  256
-    #define _MAX_DIR   256
-    #define _MAX_DRIVE 256
-    #define _MAX_EXT   256
-#else
-    #include "find.h"
+#define _MAX_FNAME 256
+#ifndef _MAX_PATH
+#define _MAX_PATH  256
 #endif
+#define _MAX_DIR   256
+#ifndef _MAX_DRIVE
+#define _MAX_DRIVE 256
+#endif
+#define _MAX_EXT   256
 
 typedef unsigned long int   dd;
 typedef unsigned short int  dw;
@@ -61,6 +61,7 @@ typedef int                 db;
 
 struct parmFlags
 {
+    int     aflag;
     int     dflag;
     int     fflag;
     int     kflag;
@@ -80,8 +81,9 @@ struct parmFlags
     float   headerSeconds;
     float   clearingSeconds;
     float   hlength;
-    char    wavFileName[_MAX_FNAME];
-    char    fullPath[_MAX_PATH];
+    char    wavFileName[_MAX_FNAME+5];
+    char    fullPath[_MAX_PATH+5];
+    char    *audioDevName;
 
     struct   qnode *binFileQ;
     unsigned int  multi;
@@ -91,38 +93,38 @@ struct parmFlags
 };
 
 char bankSwitchList[][5] =
-    {"2K",  "CV",   "4K",	"28SC", "F8SC",	"28",	"F8",   "FE",
-     "3F",	"E0",   "FA",	"2A",	"3A",	"FANR",	"2ANR",	"3ANR",
-	 "46SC","F6SC",	"26SC",	"36SC",	"46",	"F6",	"26",	"36",
-     "E7",  "E7NR", "F4SC", "24SC",	"34SC",	"44SC",	"F4",	"24",
-	 "34",	"44",	"MB",   ""};
+    {"2K",   "CV",   "4K",   "28SC", "F8SC", "28",   "F8",   "FE",
+     "3F",   "E0",   "FA",   "2A",   "3A",   "FANR", "2ANR", "3ANR",
+     "46SC", "F6SC", "26SC", "36SC", "46",   "F6",   "26",   "36",
+     "E7",   "E7NR", "F4SC", "24SC", "34SC", "44SC", "F4",   "24",
+     "34",   "44",   "MB",   ""};
 
 unsigned int controlByteList[] =
-    {0xCA,  0xEA,   0xC8,   0xF6,	0xE6,	0xD6,   0xC6,   0xCC,
-     0xCE,  0xC1,   0xE0,   0xF0,   0x60,	0xC0,	0xD0,	0x40,
-	 0x74,	0xE4,	0xF4,	0x64,	0x54,	0xC4,	0xD4,	0x44,
-     0xE3,  0xC3,   0xE2,   0xF2,	0x62,	0x72,	0xC2,	0xD2,
-	 0x42,	0x52,	0xC9,   0x00};
+    {0xCA, 0xEA, 0xC8, 0xF6, 0xE6, 0xD6, 0xC6, 0xCC,
+     0xCE, 0xC1, 0xE0, 0xF0, 0x60, 0xC0, 0xD0, 0x40,
+     0x74, 0xE4, 0xF4, 0x64, 0x54, 0xC4, 0xD4, 0x44,
+     0xE3, 0xC3, 0xE2, 0xF2, 0x62, 0x72, 0xC2, 0xD2,
+     0x42, 0x52, 0xC9, 0x00};
 
 int fileSizeList[] =
-    {2048,  2048,   4096,   8192,	8192,	8192,   8192,   8192,
-     8192,  8192,   12288,  12288,  12288,	12288,	12288,	12288,
-	 16384, 16384,	16384,	16384,	16384,	16384,	16384,	16384,
-     16384, 16384,  32768,  32768,  32768,	32768,	32768,	32768,
-	 32768,	32768,	65536,  0};
+    { 2048,  2048,  4096,  8192,  8192,  8192,  8192,  8192,
+      8192,  8192, 12288, 12288, 12288, 12288, 12288, 12288,
+     16384, 16384, 16384, 16384, 16384, 16384, 16384, 16384,
+     16384, 16384, 32768, 32768, 32768, 32768, 32768, 32768,
+     32768, 32768, 65536,     0};
 
 int startPageList[] =
-    {7,     7,      15,     31,		15,     31,		15,     15,
-     31,    31,     15,     31,		47,		15,     31,		47,
-	 63,	15,		31,		47,		63,		15,		31,		47,
-     63,    63,     15,		31,		47,		63,     15,		31,
-     47,	63,		15,     0};
+    { 7,  7, 15, 31, 15, 31, 15, 15,
+     31, 31, 15, 31, 47, 15, 31, 47,
+     63, 15, 31, 47, 63, 15, 31, 47,
+     63, 63, 15, 31, 47, 63, 15, 31,
+     47, 63, 15,  0};
 
-int clearingToneLength[2] = {26, 51};
+unsigned char clearingToneLength[2] = {26, 51};
 unsigned char clearingTone[256];
 
-int zeroBitLength,
-    oneBitLength;
+unsigned char zeroBitLength,
+              oneBitLength;
 
 unsigned char zeroBit[256],
               oneBit[256];
@@ -179,15 +181,15 @@ dd  BS_1[] = {
 /*  0x30eb4f7a,    Video Life (4K).BIN */
 /*  0x9afa761f,    Magicard (Life).bin */
     0x266bd1b6, /* Video Life (CommaVid).bin */
-	0xa0899305, /* Video Life (alternative 2K) */
+    0xa0899305, /* Video Life (alternative 2K) */
     -1
 };
 
-char BS_1_DESC[][25] = {
+const char *BS_1_DESC[] = {
     "Magicard (CommaVid)",
     "Video Life (CommaVid)",
-	"Video Life (CommaVid)",
-    -1
+    "Video Life (CommaVid)",
+    0
 };
 
 dd  BS_3[] = {
@@ -215,13 +217,13 @@ dd  BS_3[] = {
     0x549a1b6b, /* Star Wars - The Arcade Game (PAL) */
     0x36910e4d, /* Frogger II - Threedeep! (PAL) */
     0xb8bb2361, /* Gyruss (PAL) */
-	0xd3669372, /* Star Wars: Ewok Adventure (PAL) (proto) */
-	0x70db5cca, /* Star Wars: Ewok Adventure (T Jentzsch PAL to NTSC Conversion) */
-	0x6400d110, /* Lord of the Rings (proto) */
+    0xd3669372, /* Star Wars: Ewok Adventure (PAL) (proto) */
+    0x70db5cca, /* Star Wars: Ewok Adventure (T Jentzsch PAL to NTSC Conversion) */
+    0x6400d110, /* Lord of the Rings (proto) */
     -1
 };
 
-char BS_3_DESC[][50] = {
+const char *BS_3_DESC[] = {
     "Frogger II - Threedeep!",
     "Gyruss [b]",
     "Gyruss",
@@ -246,9 +248,9 @@ char BS_3_DESC[][50] = {
     "Star Wars - The Arcade Game (PAL)",
     "Frogger II - Threedeep! (PAL)",
     "Gyruss (PAL)",
-	"Star Wars - Ewok Adventure (proto) (PAL)",
-	"Star Wars - Ewok Adv. T Jentzsch PAL->NTSC (proto)",
-	"Lord of the Rings (proto)",
+    "Star Wars - Ewok Adventure (proto) (PAL)",
+    "Star Wars - Ewok Adv. T Jentzsch PAL->NTSC (proto)",
+    "Lord of the Rings (proto)",
     ""
 };
 
@@ -267,11 +269,11 @@ dd  BS_4[] = {
     0x2c34898f, /* Springer.bin */
     0x09a71583, /* Miner 2049er PAL */
     0xd5645294, /* Miner Volume 2 NTSC */
-	0x52630ec9, /* Polaris T. Jentzsch PAL to NTSC conversion*/
+    0x52630ec9, /* Polaris T. Jentzsch PAL to NTSC conversion*/
     -1
 };
 
-char BS_4_DESC[][30] = {
+const char *BS_4_DESC[] = {
     "Espial [b]",
     "Espial",
     "Miner 2049er [b1]",
@@ -284,10 +286,10 @@ char BS_4_DESC[][30] = {
     "Polaris (PAL)",
     "River Patrol (Tigervision)",
     "Springer",
-	"Miner 2049er PAL",
-	"Miner 2049er Vol. 2",
-	"Polaris (T Jentzsch NTSC->PAL)",
-    -1
+    "Miner 2049er PAL",
+    "Miner 2049er Vol. 2",
+    "Polaris (T Jentzsch NTSC->PAL)",
+    ""
 };
 
 dd  BS_5[] = {
@@ -296,32 +298,32 @@ dd  BS_5[] = {
     0xd8ecf576, /* Decathlon (PAL) */
     0x0e8757b0, /* Robot Tank (PAL) */
     0x94e8df6b, /* Space Shuttle (PAL) */
-	0xf3a4363c,	/* Thwocker prototype */
+    0xf3a4363c,    /* Thwocker prototype */
     -1
 };
 
-char BS_5_DESC[][25] = {
+const char *BS_5_DESC[] = {
     "Decathlon",
     "Robot Tank",
     "Decathlon (PAL)",
     "Robot Tank (PAL)",
     "Space Shuttle (PAL)",
-	"Thwocker (proto)",
+    "Thwocker (proto)",
+    ""
+};
+
+dd    BS_9[] = {
+    0x6a31beac,    /* Private Eye (CCE).bin */
+    0x3fa749c0,    /* Private Eye [b].bin */
+    0x33242242,    /* Private Eye.bin */
     -1
 };
 
-dd	BS_9[] = {
-	0x6a31beac,	/* Private Eye (CCE).bin */
-	0x3fa749c0,	/* Private Eye [b].bin */
-	0x33242242,	/* Private Eye.bin */
-	-1
-};
-
-char BS_9_DESC[][20] = {
+const char *BS_9_DESC[] = {
     "Private Eye (CCE)",
     "Private Eye [b]",
     "Private Eye",
-    -1
+    ""
 };
 
 
@@ -332,11 +334,11 @@ dd  BS_6[] = {
     -1
 };
 
-char BS_6_DESC[][20] = {
+const char *BS_6_DESC[] = {
     "Dig Dug.bin",
     "Off the Wall [o]",
     "Off the Wall",
-    -1
+    ""
 };
 
 dd  BS_7[] = {
@@ -347,12 +349,12 @@ dd  BS_7[] = {
     -1
 };
 
-char BS_7_DESC[][50] = {
+const char *BS_7_DESC[] = {
     "Bump n Jump [b].bin",
     "Bump n Jump.bin",
     "Burgertime.bin",
     "Masters of the Universe - The Power of He-Man",
-    -1
+    ""
 };
 
 /*
@@ -369,4 +371,4 @@ dd crctab[256];     /* table to help CRC calculation */
 #define CRC32_REV 0xA0000001    /* CRC-32 polynomial reversed */
 #define SQUARE_WAVE 0
 #define SINE_WAVE   1
-void make16BitStereo(char *sineWave, int *sineWaveLength);
+void make16BitStereo(unsigned char *sineWave, unsigned char *sineWaveLength);
