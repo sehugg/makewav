@@ -6,4 +6,4 @@ all:makewav
 #	$(CC) -c queue.c
 
 makewav: queue.o
-	$(CC) $(LDFLAGS) -lm -DLINUX -O queue.o -o makewav makewav.c
+	$(CC) $(LDFLAGS) -lm -O queue.o -o makewav makewav.c

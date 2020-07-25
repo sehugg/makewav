@@ -44,7 +44,7 @@
 #define DISPLAY_SUMMARY  2
 #define DISPLAY_DETAILS  3
 
-#ifdef __linux__
+#ifndef _WIN32
     #define _MAX_FNAME 256
     #define _MAX_PATH  256
     #define _MAX_DIR   256

@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "queue.h"
-#ifndef __linux__
+#ifdef _WIN32
 #include "find.h"
 #endif
 #include "makewav.h"
