@@ -14,9 +14,10 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "queue.h"
 #ifndef __linux__
-    #include "find.h"
+#include "find.h"
 #endif
 #include "makewav.h"
 
@@ -24,7 +25,7 @@
 #define RAW_MODE 1
 
 #ifndef _WIN32
-    #define _stricmp stricmp
+#define _stricmp strcmp
 #endif
 
 FILE *binFile, *wavFile;
@@ -507,7 +508,7 @@ db Lookup(dd *table)
     */
 }
 
-void clearMeter(meterMax)
+void clearMeter(int meterMax)
 {
     int i;
     printf("%*s",meterMax+2," ");
@@ -517,7 +518,7 @@ void clearMeter(meterMax)
 //  printf("%*s",meterMax+2,"\b");
 }
 
-void drawMeter(current, max, meterMax)
+void drawMeter(int current, int max, int meterMax)
 {
     int i,
         meterLength;
@@ -555,7 +556,7 @@ int stricmp(char *string1, char *string2)
 }
 #endif
 
-main(int argc, unsigned char *argv[])
+int main(int argc, unsigned char *argv[])
 {
     int i,
         j,

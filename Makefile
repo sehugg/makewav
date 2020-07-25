@@ -2,8 +2,8 @@
 
 all:makewav
 
-queue.o:
-	gcc -c queue.c
+#queue.o:
+#	$(CC) -c queue.c
 
 makewav: queue.o
-	gcc -lm -DLINUX -O queue.o -o makewav makewav.c
+	$(CC) $(LDFLAGS) -lm -DLINUX -O queue.o -o makewav makewav.c
