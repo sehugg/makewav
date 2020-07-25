@@ -1,0 +1,378 @@
+                           M A K E W A V    4 . 2
+
+    Makewav converts ROM images for the Atari 2600 into .wav files that
+can be transfered into a Cuttle Cart or Supercharger for play on an original
+Atari 2600.
+
+    For the Supercharger:
+            It can convert Supercharger ROM images (6k, 8448 bytes and 32k)
+        into .wav files for use with the Supercharger.  It can also convert
+        2k and 4k ROM images that were never intended to be played on the
+        Supercharger.  The 2k and 4k images may not work with an unmodified
+        Supercharger.
+
+    For the Cuttle Cart:
+            It can convert almost every ROM image ever made for the Atari
+        2600 (the single known exception being Pitfall II) into .wav files
+        for use with the Cuttle Cart.
+
+    Version 4.2 of makewav has been heavily enhanced from the previous
+major version (3.1).  If you are familiar with a previous version of makewav,
+you should read this document in full before attempting to use this version.
+
+New to version 4.2:
+
+- Bug Fix
+
+Suggested command line to create game.wav:
+
+  Cuttle Cart:
+
+     makewav game.bin
+
+  Supercharger:
+     
+     makewav -ts game.bin
+
+Advanced Features:
+  
+  Converting multiple files:
+      You can convert multiple files by listing each game separated by a
+    space.  The ROM files to be converted to .wav files should be listed
+    after all option flags. An example to convert game1.bin, game2.bin
+    and game3.bin to game1.wav, game2.wav and game3.wav respectively for
+    use with the Supercharger follows:
+      
+      makewav -ts game1.bin game2.bin game3.bin
+
+  Multi-load .wav files:
+    
+      It is possible to create .wav files that contain multiple loads.
+    If you are familiar with the original Supercharger games, you will
+    recall that the audio tape contained all of the loads strung together
+    on the tape with no audio gaps between the loads.  This can be
+    accomplished with makewav by listing the files to string together
+    separated by a "+" (plus sign). An example follows:
+
+          makewav -omultiload.wav load1.bin+load2.bin+load3.bin
+
+      The command line above will create a .wav file named "multiload.wav"
+    containing load1.bin, load2.bin, load3.bin with a 1 second header tone,
+    a 1.5 second tone between each load and a .25 seconde trailer tone.
+    Note that the -o flag was used to designate the name of the output
+    file.  If the -o flag were ommitted, the .wav file would be named
+    "load1.wav" by using the name of the first ROM image.
+
+  WildCards:
+
+      Batch conversion is now possible with the use of wildcards in the
+    filename.  Including b*.bin would convert all ROM images in the
+    current directory starting with "b" to .wav files.
+
+
+Option Flags:
+
+    Flags can be used to modify the way makewav creates a .wav file.  If
+  multiple .wav files are created, the flags affect all of them.  The
+  details of each available flag follows.
+
+  Flag  (Default)
+        Description
+
+  -b -> (default is to have value automatically determined)
+        Sets the bankswitch mode to use for the .wav file.  The possible
+        values are:  2K, CV, 4K, F8SC, F8, FE, 3F, E0, FANR, FA, F6SC,
+                     F6, E7, E7NR, F4SC, F4 and MB
+  
+  -c -> (default is to have value automatically determined)
+        The -c must be followed by a 2 digit hex number (e.g. -c0d not -cd).
+        If this flag is used in conjunction with the -b flag, the value
+        provided will override the control byte value associated with the
+        bankswitch mode chosen.  It also overrides the control byte stored
+        in the Supercharger ROM images.
+
+        The Cuttle Cart manual provides a detailed description of the
+        control byte values necessary for the Cuttle Cart.
+
+        For the Supercharger the number is generated as described below.
+
+             Bits                Function
+             ------              --------
+             D7-D5               Write Pulse Delay (Set to 0)
+             D4-D2               RAM/ROM Configuration
+
+                                 D4 D3 D2      $f000     $f800
+                                 --------      -----     -----
+                                  0  0  0        3        ROM
+                                  0  0  1        1        ROM
+                                  0  1  0        3         1
+                                  0  1  1        1         3
+                                  1  0  0        3        ROM
+                                  1  0  1        2        ROM
+                                  1  1  0        3         2
+                                  1  1  1        2         3
+
+             D1                   If 0 RAM is Write PROTECTED
+                                  If 1 RAM is Write ENABLED
+
+             D0                   If 0 ROM power is ON
+                                  If 1 ROM power is OFF
+
+             (Note: Make sure to power ROM off if you are converting
+              a .bin file that is running on a modified Supercharger.
+              This activates the modification so that games that don't
+              work on unmodified Superchargers will not crash!)
+
+  -d -> (default = 1)
+        This flag causes detailed information about the .bin file being
+        converted to be displayed.
+        
+        Value   Information
+        -----   -------------------------------------------------------
+          0     None
+          1     Number of files being created, frequency, header tone
+                length (in seconds), the bit length (see -0 and -1
+                flags) and the name of each ROM image being converted.
+          2     All above information plus bankswitch type, file size,
+                start address, multi-load byte, page count, control byte
+                and the number of blank pages in the Rom image.
+          3     All above information plus, for each page, bank #, page#,
+                bank&page byte and checksum.
+       
+                File Page #    - The page # of the .bin file
+                                 (256 bytes/page).
+                Bank #         - The bank this page will be loaded into.
+                Page #         - The page # of the bank this page will
+                                 load into.
+                page&bank byte - The value used by the Supercharger to
+                                 determine the bank and page number to
+                                 load the current page from the .bin file
+                                 into.  This is determined by
+                                 (page * 4) + bank, where banks range from
+                                 0-2 and pages range from 0-7.
+                Checksum byte  - The value of the checksum for the current
+                                 page.
+
+        What follows is a sample output from Makewav while converting
+        Suicid23.bin (a cut down 8448 byte version even though the original
+        32k version will work too) from the Supercharger CD.  The command
+        line used was:
+
+        makewav -d3 -ts suicid23.bin
+
+        Converting 1 file for use with the Supercharger:
+          Using 44khz .wav format with a 1.00 second header tone
+          (zero bit/one bit) lengths = (6/10)
+        SUICID23.BIN 
+          Bankswitch type   = Supercharger
+          File size         = 8448   Start address     = $fe00
+          Multi-Load byte   = $00    Page count        = $13
+          Control-byte      = $0f    Blank pages       = $05
+         - bank 00, page 00, page&bank byte 00, checksum 07
+         - bank 00, page 01, page&bank byte 04, checksum 82
+         - bank 00, page 02, page&bank byte 08, checksum 81
+         - bank 00, page 03, page&bank byte 0c, checksum 00
+         - bank 00, page 04, page&bank byte 10, checksum bb
+         - bank 00, page 05, page&bank byte 14, checksum 21
+         - bank 00, page 06, page&bank byte 18, checksum 2a
+         - bank 00, page 07, page&bank byte 1c, checksum eb
+         - bank 01, page 00, page&bank byte 01, checksum 44
+         - bank 01, page 01, page&bank byte 05, checksum d0
+         - bank 01, page 02, page&bank byte 09, checksum 65
+         - bank 01, page 03, page&bank byte 0d, checksum 8a
+         - bank 01, page 04, page&bank byte 11, checksum e6
+         - bank 01, page 05, page&bank byte 15, checksum 13
+         - bank 01, page 06, page&bank byte 19, checksum 9c
+         - bank 01, page 07, page&bank byte 1d, checksum 5e
+         - bank 02, page 00, page&bank byte 02, checksum a0
+         - bank 02, page 06, page&bank byte 1a, checksum 81
+         - bank 02, page 07, page&bank byte 1e, checksum 17
+
+        As you can see, bank $02, pages $01 - $05 are blank, so they were
+        left out.  This doesn't cause a problem with this game, the blank
+        pages are just the area that represent the "bitmapped" area of RAM
+        in the game.  It is possible that some games may not work right
+        when a page is left out.  You can fix this by using the -p flag.
+
+  -f -> (default = 2)
+        This flag allows you to change the speed of the tranfer.  The valid
+        range is 0-4 and the higher the number the faster the load.  Don't
+        be surprised if the faster transfers are not reliable, they are
+        really pushing the limits of the audio circuitry.  Suggested values
+        for various media are:  Audio Cassette = 0, CD = 1 or 2,
+        Computer = 2, 3, or 4.
+
+  -h -> (default = 1)
+        Allows you to set the length of the header tone in seconds.  The
+        default length is 1 second.  Values between 0.5 and 10 inclusive
+        are valid.  This flag is useful if you are going to make a tape
+        or CD track and need a little bit longer header.  This also
+        affects the length of the tones between any chained loads.  A tone
+        between chained loads is 2 times as long as the header tone.  The
+        footer tone is always 0.5 times as long as the header tone.
+
+  -i -> (default = 0.1)
+        Sets the length of the clearing tone.  This tone clears the audio
+        circuits of the Supercharger and Cuttle Cart.  Modifying the length
+        of this tone can aid getting the faster .wav files to load properly.
+        Generally you should not need to use this flag.
+
+  -k -> (default = 1)
+        Sets the .wav file format to use.  Format 0 is 8-bit mono 22khz,
+        format 1 is 8-bit mono 44khz, format 2 is 16-bit stereo 44khz.  You
+        really don't need to use format 2 unless you are creating a CD and
+        you recording software insists on having a 16-bit stereo 44khz .wav
+        file.  The format 2 files are much larger than the other formats and
+        do not provide any increase in quality over format 1 files.
+
+  -m -> (default = 00 for non-Supercharger games and values stored in ROM
+         image for Supercharger games)
+        The -m must be followed by a 2 digit hex number (e.g. -m0d not -md).
+        This number is used to indicate a unique load number.  If the code
+        is looking for load $0d and load $0f is transfered to it, the
+        Supercharger will return to either a black screen (if there is
+        a header tone between the loads) or to the "Press Play" screen and
+        wait until load $0d is played.  This overrides the multi-load byte
+        in the 8448 byte .bin files and those in Supercharger ROM images.
+
+  -o -> (default = romfile.wav where romfile is the name of the ROM file)
+        The file name of the .wav file created.  This flag should contain
+        the name of the output file when only one .wav file will be created
+        by makewav (Including a single multi-load .wav file, where the default
+        is the name of the first ROM file of the multi-load game).  If more
+        than one .wav file is being created, the flag should contain the
+        path of the destination files.
+
+  -p -> (not set by default)
+        Turns "blank page packing" OFF.  Makewav by default looks for pages
+        of the ROM image in which all of the bytes are the same value.  This
+        usually indicates "filler" in the .bin file and can be eliminated
+        most of the time.  If a particular game does not work, and you notice
+        that when using the -d flag that there are "blank" pages, try using
+        the -p flag.
+
+  -r -> (not set by default)
+        Causes a raw binary image of the data to be created instead of a
+        .wav file.  This includes the header tone (a series of $55's if the
+        raw file is viewed with a hex editor),the 8-byte game header, the
+        page headers, and the footer tone.  This does not include the
+        clearing tone since that doesn't represent any digital data.  This
+        is not only useful for debugging makewav, but also for creating
+        precalculated data for possibly a dedicated device that plays the
+        tones necessary to load games into the Supercharger or the Cuttle
+        Cart.
+
+  -s -> (default is to have value automatically determined)
+        Forces a starting address for the code.  The address must be a
+        2 byte, 4 digit hex number (e.g. -sf123 not -s123) in hi/lo format.
+        This will override all start addresses, including those in the
+        8448 byte .bin files and the .bin files on the Supercharger CD.
+
+  -t -> (default = c)
+        Determines which device the .wav files are created for.  For the
+        Cuttle Cart the value is "c" and for the Supercharger the value is
+        "s".
+
+  -v -> (default = 10)
+        Sets the volume or amplitude of the .wav file.  This was added
+        because there was concern that some .wav players didn't like the
+        .wav having the max values in the waveforms.  Valid values are 1-10
+        inclusive.  The defualt volume is 10, so there should be no reason
+        to ever actually use 10 :)
+
+  -w -> (default = 0)
+        Sets the type of wave form to use.  0 (zero) is for square-waves,
+        1 (one) is for sine-waves.  The control tone is always sent as a
+        sine-wave.
+
+  -0 -> (default determined by the -f and -k flags)
+        The number of bytes that make up the sine waveform that represents
+        a zero bit in the .wav file.  The valid range is 1 - 80.  The larger
+        the number the slower the .wav file will load.  Additionally, the
+        ratio of the 0 bit length to the 1 bit length should be approximately
+        0.5 to 0.75.
+
+  -1 -> (default determined by the -f and -k flags)
+        The number of bytes that make up the sine waveform that represents
+        a one bit in the .wav file.  The valid range is 1 - 80.  The larger
+        the number the slower the .wav file will load.  Additionally, the
+        ratio of the 0 bit length to the 1 bit length should be approximately
+        0.5 to 0.75.
+
+    The .wav files are generally fairly large, but they pack very well,
+sometimes to 6k or so.  This is because of the repetition involved.  Each
+"one bit" is the same as every other "one bit" and the same with the
+"zero bits".
+
+    Well, have fun, and if you make any cool games, drop me an e-mail!
+(heck, even if you make a lame game I'd like to see it).
+
+        Now for the boring stuff:  I hereby place this program into the
+public domain.  I am not responsible for any damage this program may cause.
+I am not liable for any misuse, intentional or otherwise, of this program.
+There is no warranty, written or implied, on this program.  The user uses
+this program at his or her own risk!
+
+                                
+                                        Bob Colbert
+                                        CEO of RetroWare
+                                        rcolbert@oasis.novia.net
+                                        http://www.novia.net/~rcolbert
+
+
+Version History:
+
+New to version 4.2:
+
+- Bug fix
+
+New to version 4.1:
+
+- Compiles in Linux.
+- Creates 16-bit Stereo 44khz .wav files (-k3 flag) which are requireded by
+  some CD authoring software.
+- Ability to choose Sine Wave Waveforms (-w1 flag).
+- Rewrote waveform generating routine to create sine waves.
+- Square wave "polarity" no longer inverted when compared to the clearing
+  tone.
+
+New to version 4.0:
+
+- Creates Cuttle Cart compatible .wav files!
+- Automatic bankswitching recognition for all methods supported by the Cuttle
+  Cart.
+- Wildcard recognition!  Now you can convert an entire directory of ROM images
+  into .wav files with one command.
+- Lightning mode!  Even faster loads than the fastest loads in the previous
+  version.
+
+New to version 3.1:
+
+- 'v' flag added that allows you to set the volume of the .wav file, some
+  people were concerned that their .wav player didn't like having the .wav
+  with the maximum volume level set.
+- 'r' flag added which causes a raw data file to be created instead of a
+  .wav file.  This raw file is the byte stream that the Supercharger reads
+  from the tape.
+- Games can now be "chained" together.  This allows you to recreate your
+  Supercharger tapes!  Each load is seperated by a tone with no silence
+  gap.
+- Restructured the way the header and footer tones are written for a more
+  straight-forward program flow.
+
+New to version 3.0:
+
+- multi-load byte command flag now works correctly (-m flag).
+- Correctly handles all .bin files on the Supercharger CD.
+- 'd' flag added that shows detailed debugging information about
+  the .bin file.
+- Makewav now determines that a page (256 byte chunk) of the .bin file is
+  empty if all of the bytes in that page are identical.  It automatically
+  leaves this page out of the .wav file.  This is great if you are developing
+  a game and have a very small piece of code!  This can be overridden with
+  the -p flag, which will force Makewav to include every page in the .wav
+  file.
+
+Below version 3.0
+
+- version history was not kept prior to version 3.0
